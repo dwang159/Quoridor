@@ -286,6 +286,12 @@ class Game:
         all_w = filter(lambda w: self.wall_is_valid(w), all_w)
         self.legal_walls = all_w
         #print "legal walls updated to:", self.legal_walls
+
+    def get_legal_moves(self):
+        return self.legal_moves
+
+    def get_legal_walls(self):
+        return self.legal_walls
     
     def update_shortest_path(self, player):
         sp = player.shortest_path
@@ -393,6 +399,21 @@ class Game:
         except Exception, e:
             print "exceptional problems (wall is valid):", str(e)
             return False
+
+    def getRandomMove():
+        '''Randomly chooses to move or place, updates the legal moves/walls and then
+           chooses a random move/wall. An official string notation is returned. '''
+        chosen_move = ""
+
+        # Randomly move or place a wall
+        if random.randint(0, 1) == 0:
+            update_legal_moves()
+            chosen_move = random.choice(get_legal_moves())
+        else:
+            update_legal_walls
+            chosen_move = random.choice(get_legal_walls())
+
+        return chosen_move
 
     def replay(self, history_list, verify=True):
         for turn in history_list:
