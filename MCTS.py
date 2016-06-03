@@ -25,13 +25,20 @@ class BasePlayer(object):
 class MonteCarlo(BasePlayer):
     def __init__(self, board, **kwargs):
         super(MonteCarlo, self).__init__(board, **kwargs)
-        self.max_moves = 10000000
-        self.max_time = datetime.timedelta(seconds=40)
+        self.max_moves = 10000
+        self.max_time = datetime.timedelta(seconds=1)
         self.C = kwargs.get('C', 1.4)
         self.wins = {1: {}, 2: {}}
         self.plays = {1: {}, 2: {}}
         self.max_depth = 0
         self.stats = None
+
+        wins = kwargs.get('wins')
+        plays = kwargs.get('plays')
+        if wins:
+            self.wins = wins
+        if plays:
+            self.plays = plays
 
     def get_play(self):
         self.max_depth = 0
@@ -49,32 +56,13 @@ class MonteCarlo(BasePlayer):
         states = [(p, self.board.next_state(state, p)) for p in legal]
 
         begin, games = datetime.datetime.utcnow(), 0
-        while datetime.datetime.utcnow() - begin < self.max_time:
-            self.random_game()
-            games += 1
-
-        self.stats.update(games=games, max_depth=self.max_depth,
-                          time=str(datetime.datetime.utcnow() - begin))
-        print self.stats['games'], self.stats['time']
-        print "Maximum depth searched:", self.max_depth
-
-        self.stats['moves'] = sorted(
-            ({'move': p,
-              'percent': 100 * self.wins[player].get(S,0) / self.plays[player].get(S,1),
-              'wins': self.wins[player].get(S,0),
-              'plays': self.plays[player].get(S,0)}
-             for p, S in states),
-            key=lambda x: (x['percent'], x['plays']),
-            reverse=True,
-        )
-        for m in self.stats['moves']:
-            print "{move}: {percent:.2f}% ({wins} / {plays})".format(**m)
 
         move = max(
             (self.wins[player].get(S,0) / self.plays[player].get(S,1), p)
             for p, S in states
         )[1]
 
+        self.update(self.board.next_state(state, move))
         return move
 
     def random_game(self):
@@ -83,7 +71,6 @@ class MonteCarlo(BasePlayer):
 
         expand = True
         for t in xrange(1, self.max_moves + 1):
-            print t
             state = new_states[-1]
             player = state[-1]
             legal = self.board.legal_plays([state])
@@ -113,9 +100,6 @@ class MonteCarlo(BasePlayer):
             if winner:
                 break
 
-        print t
-        print winner
-        print game_moves.items()
         for player, M in game_moves.iteritems():
             for S in M:
                 if S in self.plays[player]:

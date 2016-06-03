@@ -172,7 +172,7 @@ class Game:
                 self.do_move(turn_string)
             else:
                 #print "execution failed"
-                #raise QuoridorException("invalid turn string given to execute_turn()")
+                raise QuoridorException("invalid turn string given to execute_turn()")
                 return 0
         else:
             # no verifications
@@ -400,18 +400,18 @@ class Game:
             print "exceptional problems (wall is valid):", str(e)
             return False
 
-    def getRandomMove():
+    def get_random_move(self):
         '''Randomly chooses to move or place, updates the legal moves/walls and then
            chooses a random move/wall. An official string notation is returned. '''
         chosen_move = ""
 
         # Randomly move or place a wall
         if random.randint(0, 1) == 0:
-            update_legal_moves()
-            chosen_move = random.choice(get_legal_moves())
+            self.update_legal_moves()
+            chosen_move = random.choice(self.legal_moves)
         else:
-            update_legal_walls
-            chosen_move = random.choice(get_legal_walls())
+            self.update_legal_walls()
+            chosen_move = random.choice(self.legal_walls)
 
         return chosen_move
 
@@ -458,7 +458,7 @@ class Game:
         # Returns the new game state.
         b = Game(duplicate=True)
         b.restore_state(state)
-        b.execute_turn(play)
+        b.execute_turn(play, verify_legal=False)
         return (b.graph.pickle(), b.players[0].position, 
             b.players[0].num_walls, b.players[1].position, 
             b.players[1].num_walls, b.current_player_num)
@@ -471,7 +471,9 @@ class Game:
         b.restore_state(state_history[-1])
         b.update_legal_moves()
         b.update_legal_walls()
-        return b.legal_moves + b.legal_walls
+        if self.current_player.num_walls == 10:
+            return b.legal_moves
+        return b.legal_walls + b.legal_moves
 
     def winner(self, state_history):
         # Takes a sequence of game states representing the full
