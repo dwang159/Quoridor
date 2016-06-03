@@ -406,7 +406,13 @@ class Game:
         chosen_move = ""
 
         # Randomly move or place a wall
-        if random.randint(0, 1) == 0:
+        choice = random.randint(0, 1)
+
+        # If no walls left, move
+        if self.current_player.num_walls == 10:
+            choice = 0
+
+        if choice == 0:
             self.update_legal_moves()
             chosen_move = random.choice(self.legal_moves)
         else:

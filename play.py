@@ -8,10 +8,10 @@ if __name__ == "__main__":
     for i in range(10):
         print i
         game = Game.Game();
-        with open("plays.pkl") as f:
+        with open("playsold.pkl") as f:
             plays = cp.loads(f.read())
         
-        with open("wins.pkl") as f:
+        with open("winsold.pkl") as f:
             wins = cp.loads(f.read())
         
         ai = MCTS.MonteCarlo(game, plays=plays, wins=wins)
