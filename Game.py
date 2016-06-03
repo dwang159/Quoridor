@@ -7,7 +7,6 @@ from Player import Player
 import string
 import Helpers as h
 import random
-from TreeAI import TreeAI
 from pprint import pprint 
 from Helpers import global_stats
 
@@ -87,7 +86,7 @@ class Game:
             
             self.graph = SpecialGraphs.GraphNet(9,9)
             
-            cpn = random.randint(1,num_players)
+            cpn = 1
             #self.starting_player_num = cpn # never forget who started!
             self.current_player_num = cpn
             self.current_player = self.players[cpn-1]
@@ -95,7 +94,6 @@ class Game:
             all_inds = range(len(self.players))
             while num_ai > 0:
                 ai_player = random.choice(all_inds)
-                self.players[ai_player].ai = TreeAI()
                 all_inds.remove(ai_player)
                 num_ai -= 1
             self.update_all(self.players)
@@ -403,3 +401,65 @@ class Game:
                 print "REPLAY FAIL: " + turn
                 break
         self.update_all(self.players)
+
+    def start(self):
+        # Returns a representation of the starting state of the game.
+        players = h.make_2_players()
+        graph = SpecialGraphs.GraphNet(9,9)
+        board = graph.pickle()
+        return (board, players[0].position, players[0].num_walls, 
+            players[1].position, players[1].num_walls, 1)
+
+    def current_player(self, state):
+        # Takes the game state and returns the current player's
+        # number.
+        return state[0]
+
+    def restore_state(self, state):
+        self.players = h.make_2_players()
+        self.players[0].position = state[1]
+        self.players[0].num_walls = state[2]
+        self.players[1].position = state[3]
+        self.players[1].num_walls = state[4]
+        self.current_player_num = state[5]
+
+        g = Graph()
+        g.unpickle(state[0])
+        
+        self.graph = g
+
+        self.current_player = self.players[self.current_player_num - 1]
+        self.other_players = [p for p in self.players if \
+                p != self.current_player]
+
+    def next_state(self, state, play):
+        # Takes the game state, and the move to be applied.
+        # Returns the new game state.
+        b = Game(duplicate=True)
+        b.restore_state(state)
+        b.execute_turn(play)
+        return (b.graph.pickle(), b.players[0].position, 
+            b.players[0].num_walls, b.players[1].position, 
+            b.players[1].num_walls, b.current_player_num)
+
+    def legal_plays(self, state_history):
+        # Takes a sequence of game states representing the full
+        # game history, and returns the full list of moves that
+        # are legal plays for the current player.
+        b = Game(duplicate = True)
+        b.restore_state(state_history[-1])
+        b.update_legal_moves()
+        b.update_legal_walls()
+        return b.legal_moves + b.legal_walls
+
+    def winner(self, state_history):
+        # Takes a sequence of game states representing the full
+        # game history.  If the game is now won, return the player
+        # number.  If the game is still ongoing, return zero.  If
+        # the game is tied, return a different distinct value, e.g. -1.
+        b = Game(duplicate=True)
+        b.restore_state(state_history[-1])
+        for i in range(0, 2):
+            if b.players[i].position in b.players[i].goal_positions:
+                return i + 1
+        return False

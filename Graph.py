@@ -1,5 +1,6 @@
 from collections import deque
 from pprint import pprint
+import cPickle as cp
 import Helpers as h
 
 # graph error classes
@@ -250,3 +251,16 @@ class Graph:
         if not self.hasNode(node):
             return None          
         return [n for (n, w) in self.graph_dict[node]]
+
+    def pickle(self):
+        items = self.graph_dict.items()
+        for i in range(len(items)):
+            items[i] = (items[i][0], tuple(items[i][1]))
+        return cp.dumps(frozenset(items))
+
+    def unpickle(self, pickle):
+        items = list(cp.loads(pickle))
+        for i in range(len(items)):
+            items[i] = (items[i][0], list(items[i][1]))
+        self.graph_dict = dict(items)
+

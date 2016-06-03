@@ -359,11 +359,11 @@ class TkBoard():
         is_ai = self.gs.current_player.ai is not None
         if from_ai != is_ai:
             return False
-        print "EXECUTING %s TURN" % ("AI" if is_ai else "HUMAN")
+        #print "EXECUTING %s TURN" % ("AI" if is_ai else "HUMAN")
         success = self.game_stack.execute_turn(turn_str)
         self.update_gs()
         if success == 1:
-            print "\tSUCCESS"
+            #print "\tSUCCESS"
             self.moveType = "move"
             self.refresh(False)
             return True
@@ -373,7 +373,7 @@ class TkBoard():
             print "Player", self.gs.current_player_num
             self.game_over = True
             return True
-        print "\tFAILED"
+        #print "\tFAILED"
         return False
 
     def draw_squares(self):
