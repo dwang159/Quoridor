@@ -1,6 +1,10 @@
 Python Quoridor
 ===============
 
+Adapted from Jeff Bradberry and Richard Lange
+
+
+
 ## Runnin' it
 
 Just some code. no installation or anything.
